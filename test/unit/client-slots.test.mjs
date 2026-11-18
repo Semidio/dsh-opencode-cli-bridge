@@ -43,8 +43,8 @@ function applyClient(definition) {
         slots.push(name);
         return callback ? callback() : undefined;
       },
-      register: (descriptor) => {
-        registered.push(descriptor);
+      register: (descriptor, component) => {
+        registered.push({ descriptor, component });
         return () => {};
       },
     },
@@ -58,9 +58,14 @@ test("Desktop 载体：只注册 settings.section，不占侧栏", () => {
   try {
     const app = applyClient(loadClient());
     assert.deepEqual(app.slots, ["settings.section"], "Desktop 不应再注册侧栏/主面板");
-    assert.equal(app.registered[0].name, "settings.section");
-    assert.equal(app.registered[0].id, "opencode-bridge");
-    assert.equal(app.registered[0].label(), "OpenCode Bridge");
+    const { descriptor, component } = app.registered[0];
+    assert.equal(descriptor.name, "settings.section");
+    assert.equal(descriptor.id, "opencode-bridge");
+    assert.equal(descriptor.label(), "OpenCode", "设置导航显示 OpenCode");
+    // 组件渲染出的面板标题同样用 OpenCode，并带设置分区标记。
+    const rendered = component();
+    assert.equal(rendered.props.settingsSurface, true);
+    assert.equal(rendered.props.title, "OpenCode");
     assert.equal(typeof app.dispose, "function", "apply 必须返回卸载函数");
     app.dispose();
   } finally {
@@ -72,7 +77,7 @@ test("Web（无桌面载体）：保持 sidebar.panellist + main", () => {
   delete globalThis.dshDesktop;
   const app = applyClient(loadClient());
   assert.deepEqual(app.slots, ["sidebar.panellist", "main"]);
-  assert.equal(app.registered[0].name, "sidebar.panellist");
-  assert.equal(app.registered[1].name, "main");
+  assert.equal(app.registered[0].descriptor.name, "sidebar.panellist");
+  assert.equal(app.registered[1].descriptor.name, "main");
   app.dispose();
 });

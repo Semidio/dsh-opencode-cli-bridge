@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.6（2026-11-18）
+
+### 调整
+
+- 设置导航与设置面板标题由 `OpenCode Bridge` 改为 **OpenCode**（Web 侧栏卡片仍叫 OpenCode Bridge）。
+- **深浅外观适配**：面板样式全部改用 DSH 皮肤 token（`--dsw-alias-label-*`、`--dsw-alias-bg-*`、
+  `--dsw-alias-border-*`、`--dsw-alias-state-*`），不再硬编码深色专用白字，浅色模式下可正常阅读。
+- 设置分区形态去掉整页居中外壳，交给设置对话框内容列滚动。
+
+### 仓库
+
+- 源码工作目录迁移到 `C:\Users\Semidio\Documents\dsh-opencode-cli-bridge`。
+
 ## 0.1.4（2026-11-17）
 
 ### 调整

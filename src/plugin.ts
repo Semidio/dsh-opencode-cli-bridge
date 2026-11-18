@@ -18,7 +18,7 @@ export const inject = ["llm"];
  * 实机排查「修复没生效」时用它确认加载的是哪版模块（HMR live 重载可能只换
  * fiber 不换 ESM 模块实例，见 ISSUE-001 复验记录）。
  */
-export const BRIDGE_BUILD = "0.1.4-2026-11-17.1";
+export const BRIDGE_BUILD = "0.1.6-2026-11-18.1";
 
 const LOG_DIR = join(homedir(), ".dsh-opencode-bridge");
 

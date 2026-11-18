@@ -95,5 +95,10 @@ test("打包合同：package.json 声明 bundle patch + client 面，cordis.patc
   assert.match(client, /sidebar\.panellist/, "Web 需要保留 sidebar.panellist");
   assert.match(client, /isDesktopShell/, "需要桌面载体判定");
   assert.match(client, /dshDesktop/, "桌面判定首选 dshDesktop 载体");
+  // 深浅外观：颜色走 DSH 皮肤 token，禁止再硬编码深色专用白字。
+  assert.match(client, /--dsw-alias-label-primary/, "文字色必须使用宿主主题 token");
+  assert.match(client, /--dsw-alias-bg-skeleton/, "底色必须使用宿主主题 token");
+  assert.match(client, /--dsw-alias-border-l2/, "描边必须使用宿主主题 token");
+  assert.ok(!/\.obm-wrap\s*\{[^}]*color:#fff/.test(client), ".obm-wrap 不得硬编码白色前景");
   assert.match(patch, /name:\s*'dsh-opencode-cli-bridge'/);
 });

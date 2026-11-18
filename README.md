@@ -65,14 +65,14 @@ Desktop 的插件装在独立的 `desktop` profile（`~/.dsh/profiles/desktop`�
        plugin --profile desktop add dsh-opencode-cli-bridge
    ```
 
-**验证**：重启 DeepSeek Harness，打开模型选择器 → 出现 **opencode-bridge** 分组并列出模型 → 选中开聊。Desktop 版的面板在**设置 → OpenCode Bridge**（不占左侧栏）；Web 版仍在左栏「插件」卡旁。
+**验证**：重启 DeepSeek Harness，打开模型选择器 → 出现 **opencode-bridge** 分组并列出模型 → 选中开聊。Desktop 版的面板在**设置 → OpenCode**（不占左侧栏）；Web 版仍在左栏「插件」卡旁。
 
 ## 使用
 
 ![OpenCode Bridge 面板：顶部 CLI 环境状态卡 + 模型暴露勾选](docs/screenshots/oc-bridge-panel.png)
 
 - **模型选择器**：直接选 `opencode-bridge` 下的模型对话；
-- **OpenCode Bridge 面板**：Desktop 在**设置 → OpenCode Bridge**，Web 在左侧栏「插件」卡旁；顶部是 CLI 环境状态卡，下方勾选要暴露到选择器的模型，保存后下次打开选择器生效；
+- **OpenCode 面板**：Desktop 在**设置 → OpenCode**，Web 在左侧栏「插件」卡旁；顶部是 CLI 环境状态卡，下方勾选要暴露到选择器的模型，保存后下次打开选择器生效（深色/浅色外观跟随 DSH 主题）；
 - **取消**：DSH 侧停止生成即杀掉 CLI 进程树，不留孤儿进程。
 
 ## 配置

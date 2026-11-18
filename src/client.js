@@ -133,67 +133,67 @@ window.__ModuleLoader__.load({
       const style = document.createElement("style");
       style.id = "opencode-bridge-model-css";
       style.textContent = `
-.obm-wrap { display:flex; justify-content:center; align-items:center; padding:20px 22px; height:100%; overflow:hidden; color:#fff; color-scheme:dark; font-family:inherit; background:radial-gradient(1100px 480px at 100% -10%, rgba(80,130,255,.10), transparent 60%), radial-gradient(900px 420px at -12% 112%, rgba(130,90,255,.08), transparent 55%); }
+/* 颜色一律走 DSH 皮肤 token：浅色/深色外观下都跟随宿主主题，
+   不再硬编码 rgba(255,255,255,…) 这类只适用于深色的色值。 */
+.obm-wrap { display:flex; justify-content:center; align-items:center; padding:20px 22px; height:100%; overflow:hidden; color:var(--dsw-alias-label-primary,#e8e8ea); font-family:inherit; background:transparent; }
 .obm-inner { display:flex; flex-direction:column; gap:14px; width:100%; max-width:880px; max-height:min(720px, 100%); min-height:0; }
-/* 设置分区形态：交给设置对话框的内容列滚动；保留自身深色面板外观（浅色主题下文字仍可读），
-   只去掉整页居中与外层 100% 拉伸。 */
-.obm-wrap.obm-settings { justify-content:flex-start; align-items:stretch; height:auto; min-height:100%; padding:16px 18px 18px; border-radius:14px; }
+/* 设置分区形态：交给设置对话框的内容列滚动，去掉整页居中与外层 100% 拉伸。 */
+.obm-wrap.obm-settings { justify-content:flex-start; align-items:stretch; height:auto; min-height:100%; padding:8px 0 10px; }
 .obm-wrap.obm-settings .obm-inner { max-width:none; max-height:none; }
-.obm-wrap.obm-settings .obm-list { min-height:220px; }
-.obm-head { display:flex; flex-direction:column; gap:6px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.08); }
-.obm-title { font-size:17px; font-weight:650; letter-spacing:.01em; display:flex; align-items:center; gap:9px; }
-.obm-title::before { content:""; width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,#4d8dff,#8b5cf6); box-shadow:0 0 12px rgba(90,140,255,.85); flex:none; }
-.obm-sub { font-size:12px; color:rgba(255,255,255,.52); line-height:1.65; }
+.obm-wrap.obm-settings .obm-list { min-height:220px; max-height:52vh; }
+.obm-head { display:flex; flex-direction:column; gap:6px; padding-bottom:12px; border-bottom:1px solid var(--dsw-alias-border-l2,rgba(255,255,255,.12)); }
+.obm-title { font-size:17px; font-weight:650; letter-spacing:.01em; display:flex; align-items:center; gap:9px; color:var(--dsw-alias-label-primary,#e8e8ea); }
+.obm-title::before { content:""; width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,#4d8dff,#8b5cf6); box-shadow:0 0 12px rgba(90,140,255,.6); flex:none; }
+.obm-sub { font-size:12px; color:var(--dsw-alias-label-secondary,rgba(255,255,255,.62)); line-height:1.65; }
 .obm-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.obm-search { flex:1; min-width:180px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); color:#fff; font-size:13px; outline:none; transition:border-color .15s, box-shadow .15s; }
-.obm-search::placeholder { color:rgba(255,255,255,.34); }
+.obm-search { flex:1; min-width:180px; padding:8px 12px; border-radius:10px; border:1px solid var(--dsw-alias-border-l2,rgba(255,255,255,.12)); background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.04)); color:var(--dsw-alias-label-primary,#e8e8ea); font-size:13px; outline:none; transition:border-color .15s, box-shadow .15s; }
+.obm-search::placeholder { color:var(--dsw-alias-label-tertiary,rgba(255,255,255,.42)); }
 .obm-search:focus { border-color:rgba(110,140,255,.75); box-shadow:0 0 0 3px rgba(110,140,255,.22); }
-.obm-btn { padding:6px 14px; border-radius:9px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:#fff; cursor:pointer; font-size:12px; transition:background .15s, border-color .15s, transform .05s; }
-.obm-btn:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.24); }
+.obm-btn { padding:6px 14px; border-radius:9px; border:1px solid var(--dsw-alias-border-l2,rgba(255,255,255,.14)); background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.04)); color:var(--dsw-alias-label-primary,#e8e8ea); cursor:pointer; font-size:12px; transition:background .15s, border-color .15s, transform .05s; }
+.obm-btn:hover { background:var(--dsw-alias-interactive-bg-hover,rgba(255,255,255,.08)); border-color:var(--dsw-alias-border-l3,rgba(255,255,255,.16)); }
 .obm-btn:active { transform:translateY(1px); }
 .obm-btn:disabled { opacity:.38; cursor:default; transform:none; }
-.obm-btn-primary { background:linear-gradient(135deg,#3b82f6,#6366f1); border-color:transparent; font-weight:600; box-shadow:0 4px 16px rgba(80,120,255,.35); }
+.obm-btn-primary { background:linear-gradient(135deg,#3b82f6,#6366f1); border-color:transparent; color:var(--dsw-alias-label-on-color,#fff); font-weight:600; box-shadow:0 4px 16px rgba(80,120,255,.35); }
 .obm-btn-primary:hover { background:linear-gradient(135deg,#528ef7,#7c7ff4); }
-.obm-count { font-size:11px; color:rgba(255,255,255,.62); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.09); padding:4px 11px; border-radius:999px; white-space:nowrap; }
-.obm-list { flex:1; overflow:auto; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.028); }
+.obm-count { font-size:11px; color:var(--dsw-alias-label-secondary,rgba(255,255,255,.62)); background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.04)); border:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.06)); padding:4px 11px; border-radius:999px; white-space:nowrap; }
+.obm-list { flex:1; overflow:auto; border:1px solid var(--dsw-alias-border-l2,rgba(255,255,255,.12)); border-radius:12px; background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.03)); }
 .obm-list::-webkit-scrollbar { width:8px; }
-.obm-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,.16); border-radius:4px; }
-.obm-list::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.26); }
-.obm-group-head { display:flex; align-items:center; gap:10px; padding:8px 14px; background:rgba(255,255,255,.055); backdrop-filter:blur(10px); position:sticky; top:0; z-index:1; cursor:default; border-bottom:1px solid rgba(255,255,255,.07); }
-.obm-group-title { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:rgba(255,255,255,.88); cursor:pointer; user-select:none; transition:color .12s; }
-.obm-group-title:hover { color:#fff; }
-.obm-group-count { font-size:11px; color:rgba(255,255,255,.55); background:rgba(255,255,255,.08); padding:2px 9px; border-radius:999px; }
-.obm-chevron { margin-left:auto; border:none; background:none; color:rgba(255,255,255,.6); cursor:pointer; font-size:11px; padding:3px 8px; border-radius:6px; transition:background .12s, color .12s; }
-.obm-chevron:hover { background:rgba(255,255,255,.1); color:#fff; }
-.obm-row { display:flex; align-items:center; gap:12px; padding:9px 16px; border-bottom:1px solid rgba(255,255,255,.045); cursor:pointer; transition:background .12s; }
-.obm-row:hover { background:rgba(255,255,255,.06); }
+.obm-list::-webkit-scrollbar-thumb { background:var(--dsw-alias-border-l3,rgba(255,255,255,.16)); border-radius:4px; }
+.obm-list::-webkit-scrollbar-thumb:hover { background:var(--dsw-alias-border-l4,rgba(255,255,255,.2)); }
+.obm-group-head { display:flex; align-items:center; gap:10px; padding:8px 14px; background:var(--dsw-alias-bg-layer-2,#2a2a30); position:sticky; top:0; z-index:1; cursor:default; border-bottom:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.06)); }
+.obm-group-title { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--dsw-alias-label-secondary,rgba(255,255,255,.88)); cursor:pointer; user-select:none; transition:color .12s; }
+.obm-group-title:hover { color:var(--dsw-alias-label-primary,#fff); }
+.obm-group-count { font-size:11px; color:var(--dsw-alias-label-secondary,rgba(255,255,255,.55)); background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.08)); padding:2px 9px; border-radius:999px; }
+.obm-chevron { margin-left:auto; border:none; background:none; color:var(--dsw-alias-label-secondary,rgba(255,255,255,.6)); cursor:pointer; font-size:11px; padding:3px 8px; border-radius:6px; transition:background .12s, color .12s; }
+.obm-chevron:hover { background:var(--dsw-alias-interactive-bg-hover,rgba(255,255,255,.1)); color:var(--dsw-alias-label-primary,#fff); }
+.obm-row { display:flex; align-items:center; gap:12px; padding:9px 16px; border-bottom:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.045)); cursor:pointer; transition:background .12s; }
+.obm-row:hover { background:var(--dsw-alias-interactive-bg-hover,rgba(255,255,255,.06)); }
 .obm-row input { width:15px; height:15px; accent-color:#6d7dff; cursor:pointer; flex:none; }
-.obm-row-name { font-size:13px; color:#fff; font-weight:450; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.obm-row.off .obm-row-name { color:rgba(255,255,255,.52); font-weight:400; }
-.obm-row-sub { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:10px; color:rgba(255,255,255,.32); margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52%; }
+.obm-row-name { font-size:13px; color:var(--dsw-alias-label-primary,#fff); font-weight:450; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.obm-row.off .obm-row-name { color:var(--dsw-alias-label-secondary,rgba(255,255,255,.52)); font-weight:400; }
+.obm-row-sub { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:10px; color:var(--dsw-alias-label-tertiary,rgba(255,255,255,.32)); margin-left:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52%; }
 .obm-foot { display:flex; align-items:center; gap:12px; padding-top:2px; flex-wrap:wrap; }
 .obm-status { font-size:12px; padding:4px 11px; border-radius:999px; max-width:100%; overflow-wrap:anywhere; }
-.obm-status.dirty { color:#ffd88a; background:rgba(250,204,21,.12); border:1px solid rgba(250,204,21,.35); }
-.obm-status.ok { color:#7ee2a8; background:rgba(52,199,123,.12); border:1px solid rgba(52,199,123,.3); }
-.obm-status.err { color:#ff9d9d; background:rgba(255,90,90,.1); border:1px solid rgba(255,90,90,.32); }
-.obm-warn { font-size:12px; padding:9px 12px; border-radius:10px; border:1px solid rgba(250,204,21,.35); background:rgba(250,204,21,.08); color:rgba(255,255,255,.85); line-height:1.5; }
-.obm-empty { padding:30px 16px; text-align:center; color:rgba(255,255,255,.42); font-size:12px; border-bottom:none; cursor:default; }
+/* 状态胶囊：前景用语义色，底色由 currentColor 派生，深浅外观自动适配。 */
+.obm-status.dirty { color:var(--dsw-alias-state-warn-label,#dd8629); background:color-mix(in srgb,currentColor 12%,transparent); border:1px solid color-mix(in srgb,currentColor 40%,transparent); }
+.obm-status.ok, .obm-cli-badge.ok { color:var(--dsw-alias-state-success-primary,#34c77b); background:color-mix(in srgb,currentColor 12%,transparent); border:1px solid color-mix(in srgb,currentColor 40%,transparent); }
+.obm-status.err, .obm-cli-badge.err { color:var(--dsw-alias-state-error-primary,#ff6b6b); background:color-mix(in srgb,currentColor 10%,transparent); border:1px solid color-mix(in srgb,currentColor 36%,transparent); }
+.obm-warn { font-size:12px; padding:9px 12px; border-radius:10px; border:1px solid color-mix(in srgb,var(--dsw-alias-state-warn-primary,#f59e0b) 40%,transparent); background:color-mix(in srgb,var(--dsw-alias-state-warn-primary,#f59e0b) 10%,transparent); color:var(--dsw-alias-label-primary,#e8e8ea); line-height:1.5; }
+.obm-empty { padding:30px 16px; text-align:center; color:var(--dsw-alias-label-tertiary,rgba(255,255,255,.42)); font-size:12px; border-bottom:none; cursor:default; }
 .obm-empty:hover { background:none; }
 /* ---- CLI 状态区块 ---- */
-.obm-cli { display:flex; flex-direction:column; gap:8px; padding:11px 14px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.028); }
+.obm-cli { display:flex; flex-direction:column; gap:8px; padding:11px 14px; border:1px solid var(--dsw-alias-border-l2,rgba(255,255,255,.12)); border-radius:12px; background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.03)); }
 .obm-cli-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .obm-cli-badge { font-size:11px; font-weight:650; padding:3px 10px; border-radius:999px; white-space:nowrap; }
-.obm-cli-badge.ok { color:#7ee2a8; background:rgba(52,199,123,.12); border:1px solid rgba(52,199,123,.3); }
-.obm-cli-badge.err { color:#ff9d9d; background:rgba(255,90,90,.1); border:1px solid rgba(255,90,90,.32); }
-.obm-cli-ver { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:11px; color:rgba(255,255,255,.78); }
-.obm-cli-src { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:10px; color:rgba(255,255,255,.4); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); padding:2px 8px; border-radius:999px; white-space:nowrap; }
-.obm-cli-path { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:10px; color:rgba(255,255,255,.45); overflow-wrap:anywhere; }
-.obm-cli-hint { font-size:12px; color:rgba(255,255,255,.62); line-height:1.6; }
+.obm-cli-ver { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:11px; color:var(--dsw-alias-label-primary,#e8e8ea); }
+.obm-cli-src { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:10px; color:var(--dsw-alias-label-tertiary,rgba(255,255,255,.5)); background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.06)); border:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.08)); padding:2px 8px; border-radius:999px; white-space:nowrap; }
+.obm-cli-path { font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:10px; color:var(--dsw-alias-label-tertiary,rgba(255,255,255,.5)); overflow-wrap:anywhere; }
+.obm-cli-hint { font-size:12px; color:var(--dsw-alias-label-secondary,rgba(255,255,255,.62)); line-height:1.6; }
 .obm-cli-cmdrow { display:flex; gap:8px; align-items:stretch; }
-.obm-cli-cmd { flex:1; min-width:0; font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:11px; color:rgba(255,255,255,.88); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:7px 10px; overflow-wrap:anywhere; }
-.obm-cli-link { font-size:11px; color:#8ab4ff; text-decoration:none; }
+.obm-cli-cmd { flex:1; min-width:0; font-family:var(--dsw-font-mono,ui-monospace,monospace); font-size:11px; color:var(--dsw-alias-label-primary,#e8e8ea); background:var(--dsw-alias-bg-skeleton,rgba(255,255,255,.06)); border:1px solid var(--dsw-alias-border-l2,rgba(255,255,255,.1)); border-radius:8px; padding:7px 10px; overflow-wrap:anywhere; }
+.obm-cli-link { font-size:11px; color:var(--dsw-alias-link,#6b8cff); text-decoration:none; }
 .obm-cli-link:hover { text-decoration:underline; }
-.obm-cli-note { font-size:11px; color:rgba(255,255,255,.5); line-height:1.6; }
+.obm-cli-note { font-size:11px; color:var(--dsw-alias-label-tertiary,rgba(255,255,255,.5)); line-height:1.6; }
 /* ---- 宿主 UI 修补：/model、/permission 的 popupSelect 弹窗卡 ----
    宿主把它拉满 composer 浮层宽度（.EhuiKa_card { max-width:100%; left:0; right:0 }），
    大屏下横贯整页；这里限宽并居中。高度宿主已有 320px 锚定上限 + 内部滚动，刻意不去覆盖
@@ -343,6 +343,7 @@ window.__ModuleLoader__.load({
     // ---- 面板组件 ----
     function ModelExposurePanel(props) {
       const settingsSurface = props && props.settingsSurface === true;
+      const panelTitle = props && typeof props.title === "string" ? props.title : t("title");
       const [state, setState] = React.useState(null);
       const [checked, setChecked] = React.useState(() => new Set());
       const [query, setQuery] = React.useState("");
@@ -428,7 +429,7 @@ window.__ModuleLoader__.load({
       return h("div", { className: "obm-wrap" + (settingsSurface ? " obm-settings" : "") },
         h("div", { className: "obm-inner" },
         h("div", { className: "obm-head" },
-          h("div", { className: "obm-title" }, t("title")),
+          h("div", { className: "obm-title" }, panelTitle),
           h("div", { className: "obm-sub" }, t("subtitle")),
         ),
         h(CliStatusBlock),
@@ -515,9 +516,9 @@ window.__ModuleLoader__.load({
       );
     }
 
-    /** 设置分区里的面板：内容交给设置对话框自己的内容列滚动，不再画整页背景。 */
+    /** 设置分区里的面板：显示名用 OpenCode，内容交给设置对话框的内容列滚动。 */
     function SettingsSection() {
-      return h(ModelExposurePanel, { settingsSurface: true });
+      return h(ModelExposurePanel, { settingsSurface: true, title: "OpenCode" });
     }
 
     // ---- 注册 ----
@@ -539,7 +540,7 @@ window.__ModuleLoader__.load({
             name: "settings.section",
             id: SETTINGS_SECTION_ID,
             order: 60,
-            label: () => "OpenCode Bridge",
+            label: () => "OpenCode",
           }, SettingsSection);
         } else {
           // Web：保持左侧栏卡片 + 主面板（settings.section 同样可用，但不改既有形态）。
