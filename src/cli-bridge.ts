@@ -51,7 +51,17 @@ function resolveWorkspace(workspace: string): string {
   return abs;
 }
 
-function buildArgs(opts: CliBridgeOptions, workspace: string): string[] {
+/**
+ * OpenCode v2 的 `--model` 语法：`provider/model#variant`。
+ * variant 是 provider 相关的 reasoning effort 档位（如 high / max / minimal），
+ * v2 已删除独立的 `--variant` 参数，只能拼在模型 id 后面。
+ */
+function modelWithVariant(model: string, variant: string | undefined): string {
+  if (variant === undefined || variant === "" || model.includes("#")) return model;
+  return `${model}#${variant}`;
+}
+
+function buildArgs(opts: CliBridgeOptions): string[] {
   // G2: 参数一律走 argv 数组，绝不拼接。
   //
   // extraArgs 必须放在 argv **最前**，不能追加到末尾：
@@ -61,8 +71,9 @@ function buildArgs(opts: CliBridgeOptions, workspace: string): string[] {
   const args = [
     ...(opts.extraArgs ?? []),
     "run",
-    "--dir", workspace,
-    "--model", opts.model,
+    // OpenCode v2 已移除 `--dir`；工作区由 run-cli 的 spawn `cwd` 承载
+    // （v2.3.0 传 `--dir` 会直接报 `Unrecognized flag: --dir in command opencode run`）。
+    "--model", modelWithVariant(opts.model, opts.variant),
     "--format", "json",
     // 解禁批（2026-10-18）：OC 回合自动使用 OC 自己的工具，headless 场景必须 `--auto`
     // 放行权限（opencode-docs/cli.md「桥接开发要点」原话），否则非交互模式下工具调用被拒。
@@ -70,9 +81,6 @@ function buildArgs(opts: CliBridgeOptions, workspace: string): string[] {
     "--auto",
   ];
   if (opts.sessionId) args.push("--session", opts.sessionId);
-  // 思考强度透传（ISSUE-003 问题 2）：DSH reasoningEffort → `opencode run --variant`。
-  // CLI 对任意档位静默接受、不做校验（2026-10-17 实测），模型是否响应因 provider 而异。
-  if (opts.variant) args.push("--variant", opts.variant);
   // prompt 不进 argv：Windows 命令行上限 32,767 字符，超长 prompt 会让 spawn 直接失败
   // （CLI_START_FAILED，实机空气泡根因之一）。正文经 stdin 送达，opencode run 无位置参数时从 stdin 读。
   return args;
@@ -98,7 +106,7 @@ async function executeCall(opts: CliBridgeOptions): Promise<ExecuteResult> {
   };
 
   const discovered = await discoverOpencodeCli({ command: opts.command });
-  const args = buildArgs(opts, workspace);
+  const args = buildArgs(opts);
 
   const mapper = new OpenCodeEventMapper();
   const events: CliBridgeEvent[] = [];

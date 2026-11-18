@@ -14,13 +14,22 @@ function num(v: unknown): number {
 function readUsage(part: Record<string, unknown>): CliUsage {
   const tokens = isRecord(part.tokens) ? part.tokens : {};
   const cache = isRecord(tokens.cache) ? tokens.cache : {};
+  const input = num(tokens.input);
+  const output = num(tokens.output);
+  const reasoning = num(tokens.reasoning);
+  const cacheRead = num(cache.read);
+  const cacheWrite = num(cache.write);
+  // OpenCode v2.3.0 的 step_finish 不再输出 tokens.total（v1 有）。
+  // 按 v1 实测口径回算，保证 DSH usage/cost 面板不因缺字段归零：
+  //   total = input + output + reasoning + cache.read
+  const reportedTotal = num(tokens.total);
   return {
-    total: num(tokens.total),
-    input: num(tokens.input),
-    output: num(tokens.output),
-    reasoning: num(tokens.reasoning),
-    cacheRead: num(cache.read),
-    cacheWrite: num(cache.write),
+    total: reportedTotal !== 0 ? reportedTotal : input + output + reasoning + cacheRead,
+    input,
+    output,
+    reasoning,
+    cacheRead,
+    cacheWrite,
   };
 }
 

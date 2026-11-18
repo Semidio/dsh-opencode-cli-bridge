@@ -45,7 +45,7 @@ function clip(text: string, max = 200): string {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
-/** 版本输出首行 -> 版本号：`1.19.0` / `v24.18.1` / `opencode 1.19.0` 都收；解析不出退回首行原文。 */
+/** 版本输出首行 -> 版本号：`2.3.0` / `v24.18.1` / `opencode v2.3.0` 都收；解析不出退回首行原文。 */
 export function parseVersionOutput(output: string): string | null {
   const line = output.split(/\r?\n/).map((s) => s.trim()).find((s) => s !== "");
   if (line === undefined) return null;

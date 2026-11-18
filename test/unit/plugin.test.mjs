@@ -90,5 +90,10 @@ test("打包合同：package.json 声明 bundle patch + client 面，cordis.patc
   assert.match(client, /window\.__ModuleLoader__\.load\(/);
   assert.ok(client.includes(`id: "${pkg.name}"`), "client 模块 id 必须等于包名");
   assert.doesNotThrow(() => new Function(client), "client.js 必须语法可编译");
+  // Desktop 走「设置」分区，Web 走侧栏；两条注册路径都必须保留。
+  assert.match(client, /settings\.section/, "Desktop 需要注册 settings.section");
+  assert.match(client, /sidebar\.panellist/, "Web 需要保留 sidebar.panellist");
+  assert.match(client, /isDesktopShell/, "需要桌面载体判定");
+  assert.match(client, /dshDesktop/, "桌面判定首选 dshDesktop 载体");
   assert.match(patch, /name:\s*'dsh-opencode-cli-bridge'/);
 });

@@ -1,5 +1,5 @@
 /**
- * dsh-opencode-cli-bridge client 半区：「模型暴露」设置面板。
+ * dsh-opencode-cli-bridge client 半区：「模型暴露」设置面板（显示名 OpenCode Bridge）。
  *
  * 形态：DSH 浏览器模块表模块（window.__ModuleLoader__，官方 decoration 模板同款），
  * id 必须等于包名。零构建链手写 vanilla JS + React.createElement（react 取自模块表）。
@@ -15,15 +15,32 @@ window.__ModuleLoader__.load({
     const h = React.createElement;
 
     const PANEL_ID = "opencode-bridge-models";
+    const SETTINGS_SECTION_ID = "opencode-bridge";
     const MODELS_URL = "/api/opencode-bridge.models";
     const FILTER_URL = "/api/opencode-bridge.filter";
     const CLI_STATUS_URL = "/api/opencode-bridge.cli-status";
 
+    /**
+     * 是否运行在 DSH Desktop（Electron）里。Desktop 的 preload 会暴露 `dshDesktop`
+     * 载体对象（DSH 设置页自身也用它判定桌面更新通道）；浏览器里没有该对象，
+     * 再以 UA 里的 `Electron/` 兜底。Desktop 用「设置 → OpenCode Bridge」承载面板，
+     * Web 保留左侧栏卡片 + 主面板。
+     */
+    function isDesktopShell() {
+      try {
+        const carrier = typeof globalThis !== "undefined" ? globalThis.dshDesktop : undefined;
+        if (carrier !== undefined && carrier !== null) return true;
+        return typeof navigator !== "undefined" && /Electron\//.test(navigator.userAgent || "");
+      } catch {
+        return false;
+      }
+    }
+
     // ---- 自持字典（zh 优先；en 兜底）----
     const DICT = {
       zh: {
-        panel: "OC-bridge",
-        title: "OC-bridge",
+        panel: "OpenCode Bridge",
+        title: "OpenCode Bridge",
         subtitle: "勾选要暴露到 DSH 模型选择器的模型；保存后下次打开选择器生效。",
         search: "筛选模型…",
         selectAll: "全选当前",
@@ -62,8 +79,8 @@ window.__ModuleLoader__.load({
         cliLoadFailed: "CLI 状态获取失败",
       },
       en: {
-        panel: "OC-bridge",
-        title: "OC-bridge",
+        panel: "OpenCode Bridge",
+        title: "OpenCode Bridge",
         subtitle: "Tick the models to expose in the DSH model picker; saved changes apply on next open.",
         search: "Filter models…",
         selectAll: "Select shown",
@@ -118,6 +135,11 @@ window.__ModuleLoader__.load({
       style.textContent = `
 .obm-wrap { display:flex; justify-content:center; align-items:center; padding:20px 22px; height:100%; overflow:hidden; color:#fff; color-scheme:dark; font-family:inherit; background:radial-gradient(1100px 480px at 100% -10%, rgba(80,130,255,.10), transparent 60%), radial-gradient(900px 420px at -12% 112%, rgba(130,90,255,.08), transparent 55%); }
 .obm-inner { display:flex; flex-direction:column; gap:14px; width:100%; max-width:880px; max-height:min(720px, 100%); min-height:0; }
+/* 设置分区形态：交给设置对话框的内容列滚动；保留自身深色面板外观（浅色主题下文字仍可读），
+   只去掉整页居中与外层 100% 拉伸。 */
+.obm-wrap.obm-settings { justify-content:flex-start; align-items:stretch; height:auto; min-height:100%; padding:16px 18px 18px; border-radius:14px; }
+.obm-wrap.obm-settings .obm-inner { max-width:none; max-height:none; }
+.obm-wrap.obm-settings .obm-list { min-height:220px; }
 .obm-head { display:flex; flex-direction:column; gap:6px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.08); }
 .obm-title { font-size:17px; font-weight:650; letter-spacing:.01em; display:flex; align-items:center; gap:9px; }
 .obm-title::before { content:""; width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,#4d8dff,#8b5cf6); box-shadow:0 0 12px rgba(90,140,255,.85); flex:none; }
@@ -319,7 +341,8 @@ window.__ModuleLoader__.load({
     }
 
     // ---- 面板组件 ----
-    function ModelExposurePanel() {
+    function ModelExposurePanel(props) {
+      const settingsSurface = props && props.settingsSurface === true;
       const [state, setState] = React.useState(null);
       const [checked, setChecked] = React.useState(() => new Set());
       const [query, setQuery] = React.useState("");
@@ -402,7 +425,7 @@ window.__ModuleLoader__.load({
         }
       };
 
-      return h("div", { className: "obm-wrap" },
+      return h("div", { className: "obm-wrap" + (settingsSurface ? " obm-settings" : "") },
         h("div", { className: "obm-inner" },
         h("div", { className: "obm-head" },
           h("div", { className: "obm-title" }, t("title")),
@@ -492,6 +515,11 @@ window.__ModuleLoader__.load({
       );
     }
 
+    /** 设置分区里的面板：内容交给设置对话框自己的内容列滚动，不再画整页背景。 */
+    function SettingsSection() {
+      return h(ModelExposurePanel, { settingsSurface: true });
+    }
+
     // ---- 注册 ----
     return {
       inject: ["slots"],
@@ -505,8 +533,19 @@ window.__ModuleLoader__.load({
             console.warn("[dsh-opencode-bridge] slot registration failed:", slot, e);
           }
         };
-        safeRegister("sidebar.panellist", { name: "sidebar.panellist", id: PANEL_ID, order: 1, label: t("panel") }, PanelIcon);
-        safeRegister("main", { name: "main", key: PANEL_ID }, ModelExposurePanel);
+        if (isDesktopShell()) {
+          // Desktop：作为「设置」对话框的一个分区，不再占用左侧栏。
+          safeRegister("settings.section", {
+            name: "settings.section",
+            id: SETTINGS_SECTION_ID,
+            order: 60,
+            label: () => "OpenCode Bridge",
+          }, SettingsSection);
+        } else {
+          // Web：保持左侧栏卡片 + 主面板（settings.section 同样可用，但不改既有形态）。
+          safeRegister("sidebar.panellist", { name: "sidebar.panellist", id: PANEL_ID, order: 1, label: t("panel") }, PanelIcon);
+          safeRegister("main", { name: "main", key: PANEL_ID }, ModelExposurePanel);
+        }
         return () => {
           for (const dispose of registrations) {
             try {

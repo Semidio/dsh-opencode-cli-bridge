@@ -243,8 +243,8 @@ export class DshChunkConverter {
       const names = this.#toolNames.slice(0, 3).join("、");
       const notice =
         names === ""
-          ? `[OC-bridge] 本轮没有产生文本输出。`
-          : `[OC-bridge] 本轮模型执行了工具（${names}）但没有产生文本输出。`;
+          ? `[OpenCode Bridge] 本轮没有产生文本输出。`
+          : `[OpenCode Bridge] 本轮模型执行了工具（${names}）但没有产生文本输出。`;
       const index = this.#index++;
       out.push({ type: "block-start", index, blockType: "text" });
       for (const piece of chunkText(notice, this.#chunkSize)) {

@@ -80,7 +80,10 @@ export interface CliBridgeOptions {
   model: string;
   prompt: string;
   sessionId?: string;
-  /** 思考强度透传：非空时作为 `opencode run --variant` 的值（ISSUE-003 问题 2）。 */
+  /**
+   * 思考强度透传：非空时拼进 `opencode run --model provider/model#variant`
+   * （OpenCode v2 语法；v2 已移除独立的 `--variant` 参数）。
+   */
   variant?: string;
   signal?: AbortSignal;
   timeouts?: Partial<CliTimeouts>;

@@ -21,10 +21,20 @@
 
 ```sh
 npm pack                                  # 先出 tgz 自检 contents
-dsh plugin --profile web add .\dsh-opencode-cli-bridge-<ver>.tgz   # 干净 profile 冒烟
+dsh plugin --profile web add .\dsh-opencode-cli-bridge-<ver>.tgz   # Web profile 冒烟
 npm publish                                # 裸名无需 --access public
 git tag v<ver> && git push --tags         # + GitHub Release
 ```
+
+**Desktop profile 冒烟**（必须用 Desktop 自带 CLI，普通 npm 版 `dsh` 会拒绝 `--profile desktop`）：
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" `
+    plugin --profile desktop add .\dsh-opencode-cli-bridge-<ver>.tgz
+```
+
+装完重启 DeepSeek Harness，确认模型选择器出现 `opencode-bridge` 分组；不通过时用同一启动器
+`plugin --profile desktop remove dsh-opencode-cli-bridge` 回滚。
 
 预构建包直接发 npm 可免 pnpm `allowBuilds` 构建授权摩擦（我们零构建脚本依赖，天然满足）。
 
@@ -51,6 +61,8 @@ git tag v<ver> && git push --tags         # + GitHub Release
 ## 四、README 安装兜底写法（已内置）
 
 - `dsh: command not found` → `npx -y --package @deepseek-ai/dsh dsh plugin --profile web add <pkg>`；
+- Desktop 没有 `dsh` 命令 → 用 Desktop 设置里的插件管理器安装，或直接调用
+  `%LOCALAPPDATA%\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd`；
 - 源码/tgz 安装路径；
 - 国内镜像不是 README 内联参数，社区做法是 profile 的 `.npmrc` 指 `registry.npmmirror.com`（如 dsh-region 插件），README 提一句即可。
 

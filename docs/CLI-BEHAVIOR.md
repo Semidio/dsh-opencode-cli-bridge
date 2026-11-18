@@ -1,9 +1,12 @@
 # OpenCode CLI 行为实测记录
 
-> 记录时间：2026-10-15
+> 记录时间：2026-10-15（v1.19.0）；**2026-11-17 增补 OpenCode v2.3.0 复验**（见 §13）
 > 性质：**实测证据**，不是设计建议。每条结论都有原始输出佐证。
 > 范围：`opencode` CLI 的可执行入口、参数传递保真度、进程树与清理行为。
 > 用途：作为 `CliBridge` 模块（OC → 插件段）实现时的硬约束依据。
+>
+> ⚠️ **当前适配基线是 OpenCode v2.x**。`--dir`、`--variant` 等 v1 参数已在 v2 移除，
+> 文中涉及它们的历史段落只作 v1 记录保留；现行参数形态以 §13 为准。
 
 ---
 
@@ -13,13 +16,15 @@
 执行入口只能用 opencode.exe；
 opencode.cmd 既跑不起来（Node 24 抛 EINVAL），跑起来也不安全（命令注入 + 孤儿进程）；
 CLI 自身单进程，但会派生 git 子进程，所以杀进程必须用 /T 杀子树。
+
+v2 追加：工作区靠 spawn cwd（没有 --dir）；思考强度写进 --model provider/model#variant。
 ```
 
 ---
 
 ## 1. 测试环境
 
-| 项 | 值 |
+| 项 | 值（v1 记录，2026-10-15） |
 |---|---|
 | 操作系统 | Windows x64 |
 | Node.js | `v24.18.1` |
@@ -31,6 +36,15 @@ CLI 自身单进程，但会派生 git 子进程，所以杀进程必须用 /T �
 | PATH 命中的目录 | `C:\Users\<user>\AppData\Roaming\npm`（**`bin\` 不在 PATH**） |
 | 测试用模型 | `opencode/mimo-v2.6-flash-free` |
 | 测试用工作区 | `<ws>\tmp-probe-ws`（测后已删） |
+
+**v2 复验环境（2026-11-17）**：
+
+| 项 | 值 |
+|---|---|
+| OpenCode CLI | `v2.3.0`（Scoop：`C:\Users\<user>\scoop\shims\opencode.exe`） |
+| DSH | Desktop 0.2.1-rc.2 运行时 / host 包 0.2.2-rc.3；Web profile 同源 |
+| Node.js | `v24.21.0`（DSH 自带运行时） |
+| 测试用模型 | `opencode/mimo-v2.6-flash-free` |
 
 `opencode-ai` 包的 `package.json` 关键字段：
 
@@ -369,14 +383,14 @@ Error: Unknown: FileSystem.open (C:\Users\<user>\.local\share\opencode\log\openc
 ### 仍未验证（留给实现期的集成测试）
 
 - [ ] `--session` 指向不存在 / 失效 session 时的行为
-- [ ] `--session` 与 `--dir` 不一致时的行为
+- [ ] `--session` 与进程 cwd 不一致时的行为（v1 的 `--dir` 已在 v2 移除）
 - [ ] 同一 session 更换 model 是否允许
 - [ ] 中途 kill 后 session 是否已经持久化
 - [ ] `tool_use` / `tool_result` 的完整结构
 - [ ] 是否存在 `reasoning` / `retry` / `error` 等其他 stdout 事件
 - [ ] 多个 `step_finish` 时 usage 是覆盖还是累加
 - [ ] 只有 `tool_use` 没有 `text` 时如何结束
-- [ ] `--dir` 是否必须绝对路径、workspace 不存在时的行为
+- [ ] workspace 不存在时 `cwd` 的行为（v2 无 `--dir`，桥内先校验再 spawn）
 - [ ] 非 JSON stderr 在失败路径如何出现
 - [ ] JSON 半行 / 超长单行的处理
 
@@ -532,7 +546,7 @@ total      600s    （实测 60.5s，长回答需更大余量）
 shutdown   3s      （kill 前宽限期）
 ```
 
-### 12.3 P3 · 无效 `--session`（3.0s）—— `SESSION_INVALID` 成立
+### 12.3 P3 · 无效 `--session`（3.0s）—— `SESSION_INVALID` 成立（v1；v2 语义已变，见 §13.4）
 
 参数：`--session ses_probe_does_not_exist_00000`
 
@@ -574,10 +588,107 @@ shutdown   3_000
 
 ### 12.6 仍未验证（更新后）
 
-- [ ] `--session` 与 `--dir` 不一致时的行为
-- [ ] 同一 session 更换 model 是否允许
+- [ ] `--session` 与进程 cwd 不一致时的行为
+- [ ] 同一 session 更换 model（含 `#variant`）是否允许
 - [ ] 中途 kill 后 session 是否已经持久化
 - [ ] 非 JSON stderr 在**其他**失败路径的形态（本次只测了 session 失效）
 - [ ] JSON 半行 / 超长单行（真实 CLI 未复现，fake CLI 已覆盖）
 - [ ] 是否存在 `retry` / `error` 等其他 stdout 事件类型
 - [ ] 空正文且 `reason="stop"` 时的真实形态
+
+---
+
+## 13. OpenCode v2.3.0 复验（2026-11-17）
+
+> 背景：本机 OpenCode 升级到 `v2.3.0` 后，桥接全部请求 `finish=error:PROTOCOL_ERROR`，
+> `diagnostics.log` 里反复出现 `Unrecognized flag: --dir in command opencode run`。
+> 本节是对 v2 的重新实测，也是现行实现的参数基线。
+
+### 13.1 `opencode run --help`（v2.3.0 原文，节选）
+
+```text
+USAGE
+  opencode run [flags] [<message...>]
+
+FLAGS
+  --continue, -c            Continue the last session
+  --session, -s string      Session ID to continue, or to create if it does not exist
+  --fork                    Fork the session before continuing
+  --worktree, -w [=name]    Start a new session in a new git worktree, optionally with this name
+  --model, -m string        Model to use in the format provider/model#variant
+  --agent string            Agent to use
+  --format choice           Output format (choices: default, json)
+  --file, -f string         File to attach to the message
+  --title string            Session title
+  --archived                Create the session archived so it stays out of session lists
+  --thinking                Show thinking blocks
+  --auto                    Auto-approve permissions that are not explicitly denied
+```
+
+**与 v1 的差异（会直接影响桥接）**：
+
+| v1.19.0 | v2.3.0 | 桥接处置 |
+|---|---|---|
+| `--dir <workspace>` | **已移除**（传了直接报 `Unrecognized flag`） | 工作区改由 `spawn(..., { cwd })` 承载 |
+| `--variant <id>` | **已移除** | variant 拼进 `--model provider/model#variant` |
+| `--model provider/model` | `--model provider/model#variant` | 仍传 `--model`，variant 作为 `#` 后缀 |
+| `--format json` / `--session` / `--auto` | 保留 | 不变 |
+| `--command` / `--attach` / `--port` / `--password` / `--username` | 移除 | 桥接从未使用，无影响 |
+
+### 13.2 现行 argv 形态
+
+```text
+run --model <provider/model[#variant]> --format json --auto [--session <ses_...>]
+```
+
+- `run` 由子进程 `cwd` = 已解析的绝对工作区决定（`run-cli.ts` 已设置 `cwd`）；
+- prompt 仍走 stdin，不占 argv（Windows 32,767 字符上限）；
+- variant 为 `off`/缺省时不加 `#` 后缀。
+
+### 13.3 事件流（v2.3.0 实测）
+
+命令：`opencode run --model opencode/mimo-v2.6-flash-free --format json --auto`，prompt 经 stdin。
+
+```json
+{"type":"step_start","sessionID":"ses_...","part":{"messageID":"msg_...","type":"step-start"}}
+{"type":"text","sessionID":"ses_...","part":{"messageID":"msg_...","type":"text","text":"hi","time":{"start":...,"end":...}}}
+{"type":"step_finish","sessionID":"ses_...","part":{"messageID":"msg_...","type":"step-finish","reason":"stop","cost":0,"tokens":{"input":2614,"output":3,"reasoning":8,"cache":{"read":4096,"write":0}}}}
+```
+
+**结论**：
+
+1. 事件 `type` 与 `part.type` 的命名关系不变（`step_start` ↔ `step-start`、`step_finish` ↔ `step-finish`），
+   `map-events.ts` 以事件 `type` 为准的解析逻辑无需改；
+2. ⚠️ **`tokens.total` 在 v2 不再输出**。`map-events.ts` 已按 v1 实测口径回算
+   `total = input + output + reasoning + cache.read`，避免 DSH usage 归零；
+3. `reason`、`cost`、`cache` 字段结构与 v1 一致；
+4. `--thinking` 仍是「是否输出 `reasoning` 事件」的开关，桥接未默认开启。
+
+### 13.4 `--session` 语义变化（v1 → v2）
+
+v2 帮助文本：`--session, -s string  Session ID to continue, or to create if it does not exist`。
+实测传 `ses_probe_does_not_exist_00000`：进程正常进入事件流，所有事件的 `sessionID`
+直接回显该 id —— **不再像 v1 那样 exit 1 + stderr `Session not found`**。
+
+对桥的影响：
+
+- `SESSION_INVALID` 的 stderr 判定保留（旧版本 / 仍会报错的服务端仍可能出现）；
+- 会话账本失效时，v2 会静默复用/创建该 id，桥的 `onSessionId` 推进逻辑照常工作，
+  不会再把「会话不存在」误判成协议错误；
+- 集成用例 R03 已按 v2 语义改写（断言不判 `SESSION_INVALID`、回显给定 id）。
+
+v2 `error` 事件形状（免费额度耗尽实测）：
+
+```json
+{"type":"error","sessionID":"ses_...","error":{"type":"provider.free-limit","message":"...","status":429}}
+```
+
+映射层仍统一产出 `UPSTREAM_ERROR` finish（错误正文进 stderr/诊断，不污染正文）。
+
+### 13.4 复验清单
+
+- [x] v2 参数表（§13.1）与 `--help` 原文一致
+- [x] 真实 `run --format json` 能返回 `step_start/text/step_finish`
+- [x] 去掉 `--dir`、variant 改 `#variant` 后，原 v1 事件映射与 chunk 转换继续可用
+- [ ] 多 step + 工具调用的 v2 事件序列（单测用 fake CLI 覆盖，真实 CLI 未逐项复跑）
+- [ ] `tokens.total` 回算与上游计费口径的一致性（仅影响展示/成本统计）

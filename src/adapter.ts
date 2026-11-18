@@ -12,7 +12,7 @@ export interface AdapterGenerateOptions {
   model: string;
   system?: string;
   messages: readonly PromptMessage[];
-  /** 思考强度（DSH GenerateOptions.reasoningEffort）；经 `--variant` 透传给 OpenCode CLI。 */
+  /** 思考强度（DSH GenerateOptions.reasoningEffort）；经 `--model provider/model#variant` 透传给 OpenCode CLI。 */
   reasoningEffort?: string;
   signal?: AbortSignal;
   sessionId?: string;

@@ -54,16 +54,16 @@ RUN("R02 续接：第二轮记得第一轮内容", async () => {
   } finally { await cleanup(dir); }
 });
 
-// 计划原文写的是 assert.rejects，但与 spec I4 / Ruling F14 冲突：
-// runCliBridge 对执行期失败永远 resolve（错误走 finishReason="error" + errorCode），
-// 只有建立阶段错误（参数非法 / WORKSPACE_INVALID / CLI_NOT_FOUND）才 reject。
-// 断言按 spec 与 Task 8 单测（"session-not-found -> 执行期 resolve"）修正。
-RUN("R03 无效 --session -> resolve finishReason=error, errorCode=SESSION_INVALID", async () => {
+// OpenCode v2 的 `--session` 语义已变：帮助文本明确 "Session ID to continue, or to create
+// if it does not exist"，传不存在的 id 不再报错，而是直接以该 id 建立会话（v1 是 exit 1 +
+// stderr "Session not found"）。故本用例改为断言「不判 SESSION_INVALID」，且事件流回显该 id。
+// （桥的 SESSION_INVALID 回退逻辑保留，用于仍会报错的服务端/旧版本。）
+RUN("R03 v2：不存在的 --session 直接创建，不报 SESSION_INVALID", async () => {
   const dir = mkws();
   try {
     const r = await runCliBridge({ workspace: dir, model: MODEL, prompt: "hi", sessionId: "ses_probe_does_not_exist_00000", timeouts: SLOW });
-    assert.equal(r.finishReason, "error");
-    assert.equal(r.errorCode, "SESSION_INVALID");
+    assert.notEqual(r.errorCode, "SESSION_INVALID");
+    assert.equal(r.sessionId, "ses_probe_does_not_exist_00000");
   } finally { await cleanup(dir); }
 });
 

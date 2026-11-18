@@ -1,6 +1,6 @@
 {
   "name": "dsh-opencode-cli-bridge",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "DeepSeek Harness plugin: bridge DSH to OpenCode-compatible models via the local OpenCode CLI (native LlmAdapter).",
   "type": "module",
   "author": "home-river",

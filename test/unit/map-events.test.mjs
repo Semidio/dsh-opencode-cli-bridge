@@ -111,6 +111,16 @@ test("usageMode=last 时只保留最后一个 step", () => {
   });
 });
 
+test("OpenCode v2 缺 tokens.total -> 按 input+output+reasoning+cache.read 回算", () => {
+  const m = new OpenCodeEventMapper();
+  m.push(stepFinish("ses_1", "msg_1", "stop", {
+    input: 2615, output: 3, reasoning: 11, cache: { read: 3072, write: 0 },
+  }));
+  assert.deepEqual(m.usage, {
+    total: 5701, input: 2615, output: 3, reasoning: 11, cacheRead: 3072, cacheWrite: 0,
+  });
+});
+
 test("step_finish 的 cache 字段缺失时按 0 处理", () => {
   const m = new OpenCodeEventMapper();
   m.push(stepFinish("ses_1", "msg_1", "stop", { total: 10, input: 6, output: 4, reasoning: 0 }));

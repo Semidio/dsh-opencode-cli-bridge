@@ -7,6 +7,7 @@ import {
 } from "../../lib/to-dsh-chunks.js";
 import { CliBridgeError, CliBridgeAbortError } from "../../lib/errors.js";
 import { ZERO_USAGE } from "../../lib/types.js";
+import { formatNotFoundMessage } from "../../lib/install-advice.js";
 
 function textEvent(text, over = {}) {
   return { kind: "text", sessionId: "ses_1", text, ...over };
@@ -208,7 +209,8 @@ test("CLI_NOT_FOUND 的 failure 消息附安装命令与下载链接（与设置
   const chunks = c.end();
   const failure = chunks[1].reason.failure;
   assert.equal(failure.code, "CLI_NOT_FOUND");
-  assert.match(failure.message, /opencode-ai/);
+  // 具体安装命令随宿主包管理器而变（npm / scoop / choco），断言与设置面板同一口径即可。
+  assert.equal(failure.message, formatNotFoundMessage());
   assert.match(failure.message, /https:\/\//);
 });
 

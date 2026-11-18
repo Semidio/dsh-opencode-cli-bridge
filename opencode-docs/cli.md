@@ -2,6 +2,9 @@
 
 > 来源：[https://opencode.ai/docs/cli](https://opencode.ai/docs/cli)（原文 `packages/web/src/content/docs/cli.mdx` @ anomalyco/opencode dev 分支）
 > 抓取日期：2026-10-17
+> **2026-11-17 复验（OpenCode v2.3.0）**：`run` 子命令的参数已按本机 `opencode run --help`
+> 实测重写；v2 移除了 `--dir`、`--variant`、`--command`、`--attach`、`--port`、`--password`、
+> `--username`，工作区改为进程 `cwd`，variant 改为 `--model provider/model#variant`。
 
 OpenCode CLI options and commands.
 
@@ -204,38 +207,32 @@ opencode run [message..]
 opencode run Explain the use of context in Go
 ```
 
-可 attach 到已运行的 `opencode serve` 实例，避免每次 run 都冷启动 MCP server：
-
-```bash
-# 一个终端起 headless server
-opencode serve
-# 另一个终端 attach 运行
-opencode run --attach http://localhost:4096 "Explain async/await in JavaScript"
-```
-
-##### Flags
+##### Flags（OpenCode v2.3.0 实测）
 
 | Flag | Short | Description |
 | --- | --- | --- |
-| `--command` |  | 要执行的命令，message 作为其参数 |
 | `--continue` | `-c` | 继续最近一次会话 |
-| `--session` | `-s` | 指定继续的会话 ID |
-| `--fork` |  | 继续时 fork 会话 |
-| `--model` | `-m` | `provider/model` 格式的模型 |
+| `--session` | `-s` | 继续指定会话 ID；不存在时创建 |
+| `--fork` |  | 继续前 fork 会话 |
+| `--worktree` | `-w` | 在新的 git worktree 中开启会话（可选名字） |
+| `--model` | `-m` | `provider/model#variant` 格式的模型（variant 可省略） |
 | `--agent` |  | 使用的 agent |
-| `--file` | `-f` | 附加到消息的文件（可多个） |
-| `--format` |  | `default`（格式化）或 `json`（原始 JSON 事件流） |
-| `--title` |  | 会话标题（缺省用截断的 prompt） |
-| `--attach` |  | attach 到运行中的 opencode server（如 http://localhost:4096） |
-| `--password` | `-p` | Basic auth 密码（默认 `OPENCODE_SERVER_PASSWORD`） |
-| `--username` | `-u` | Basic auth 用户名（默认 `OPENCODE_SERVER_USERNAME` 或 `opencode`） |
-| `--dir` |  | 运行目录；attach 时为远端服务器上的路径 |
-| `--port` |  | 本地 server 端口（默认随机） |
-| `--variant` |  | 模型变体（provider 相关的 reasoning effort） |
+| `--format` |  | `default` 或 `json`（原始 JSON 事件流） |
+| `--file` | `-f` | 附加到消息的文件 |
+| `--title` |  | 会话标题 |
+| `--archived` |  | 直接把新会话建成归档态（脚本/CI 用） |
 | `--thinking` |  | 显示 thinking 块 |
 | `--auto` |  | 自动批准未显式拒绝的权限 |
 
-> **桥接开发要点**：`--format json` 输出原始 JSON 事件，是 `dsh-opencode-bridge` 解析流式输出的抓手；`--auto` 用于 headless 场景放行权限；`--variant` 对应 provider 的 reasoning effort（可映射 DSH 的 reasoning_effort）。
+全局参数（节选）：`--help/-h`、`--version/-v`、`--log-level`、`--print-logs`、`--standalone`、`--server`。
+
+> **v2 变更**：`--dir` 已移除 —— 工作目录由进程 `cwd` 决定；`--variant` 已移除 ——
+> 思考强度写成 `--model provider/model#high`；`--command`、`--attach`、`--port`、
+> `--password`、`--username` 也从 `run` 中移除。
+>
+> **桥接开发要点**：`--format json` 输出原始 JSON 事件，是本插件解析流式输出的抓手；
+> `--auto` 用于 headless 场景放行权限；variant 对应 provider 的 reasoning effort
+> （映射 DSH 的 `reasoningEffort`）。
 
 ---
 

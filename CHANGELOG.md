@@ -1,5 +1,47 @@
 # Changelog
 
+## 0.1.4（2026-11-17）
+
+### 调整
+
+- **Desktop 版改为设置面板**：检测到 Desktop 载体（`globalThis.dshDesktop`）时，
+  面板注册进「设置」对话框的 `settings.section`（设置 → **OpenCode Bridge**），
+  不再占用左侧栏；Web 版保持原左侧栏卡片 + 主面板。
+- 设置分区内使用独立的紧凑样式（去掉整页背景与居中外壳，交给设置内容列滚动）。
+
+## 0.1.2（2026-11-17）
+
+### 修复
+
+- **模型列表只剩一个模型**：`models.json` 的 `static` 保底快照此前按 24h TTL 当作新鲜缓存，
+  一次瞬时抓取失败会把目录锁成 `STATIC_MODELS`（只有 `opencode/mimo-v2.6-flash-free`）。
+  现在 `static` 缓存一律视为过期，下次加载立即重试 CLI，成功后升级为 `cli` 缓存。
+- **面板显示名**：`OC-bridge` → **OpenCode Bridge**（侧栏卡片、面板标题、零文本兜底提示语同步）。
+
+## 0.1.1（2026-11-17）
+
+### 兼容性
+
+- **OpenCode v2 适配**（实测 v2.3.0）：
+  - 移除 `--dir`：工作区改由 `spawn` 的 `cwd` 承载（v2 传 `--dir` 直接报
+    `Unrecognized flag: --dir in command opencode run`，曾导致全部请求 `PROTOCOL_ERROR`）；
+  - 移除 `--variant`：思考强度改为写进 `--model provider/model#variant`；
+  - `tokens.total` 在 v2 的 `step_finish` 中不再输出，改为按
+    `input + output + reasoning + cache.read` 回算，避免 usage/cost 归零；
+  - 事件流 `step_start / text / reasoning / tool_use / tool_result / step_finish` 形状未变，
+    映射与 chunk 转换逻辑保持。
+- **DSH Desktop 兼容**：
+  - 插件可安装到 Desktop 的独立 `desktop` profile（`~/.dsh/profiles/desktop`）；
+  - 客户端声明保持 `dsh.client.platform = "web"`（Desktop 与 Web 共用同一套前端）；
+  - README / RELEASE 补充 Desktop 安装方式（图形界面插件管理器或 Desktop 自带
+    `dsh.cmd plugin --profile desktop add`）。
+
+### 文档
+
+- `docs/CLI-BEHAVIOR.md` 增补 OpenCode v2.3.0 复验（参数表、argv 形态、事件流差异）；
+- `opencode-docs/cli.md` 的 `run` 参数按 v2 实测重写；
+- README 增加 Web / Desktop 双安装说明与版本兼容表。
+
 ## 0.1.0（首个公开版，2026-10-19 发布）
 
 ### 功能

@@ -64,6 +64,26 @@ test("loadCatalog: 新鲜缓存直接命中，不触发 fetch", async () => {
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test("loadCatalog: static 缓存不算新鲜，立即重试并升级为 cli 缓存", async () => {
+  const dir = tmp();
+  try {
+    const path = join(dir, "models.json");
+    writeCache(path, {
+      source: "static",
+      fetchedAt: new Date().toISOString(),
+      models: [{ id: "opencode/mimo-v2.6-flash-free", name: "MiMo v2.6 Flash (free)" }],
+    });
+    let fetched = false;
+    const models = await loadCatalog({
+      cachePath: path,
+      fetchModels: () => { fetched = true; return [{ id: "opencode/fresh-one", name: "opencode/fresh-one" }]; },
+    });
+    assert.equal(fetched, true, "static 快照后必须重新抓取，不能按 24h TTL 命中");
+    assert.ok(models.some((m) => m.id === "opencode/fresh-one"));
+    assert.equal(readCache(path).source, "cli");
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test("loadCatalog: 过期缓存触发 fetch，成功后写回缓存", async () => {
   const dir = tmp();
   try {

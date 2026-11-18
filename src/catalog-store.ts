@@ -126,7 +126,11 @@ export function loadCatalog(
   }
 
   const cached = readCache(cachePath);
-  const fresh = cached !== null && now() - Date.parse(cached.fetchedAt) < ttlMs;
+  // 只有 CLI 来源的缓存才算「新鲜」。static 是抓取失败时的保底快照，若也按 24h TTL
+  // 命中，一次瞬时失败会把模型列表锁成 STATIC_MODELS（实测症状：面板只剩
+  // opencode/mimo-v2.6-flash-free），直到 TTL 过期才自愈。
+  const fresh = cached !== null && cached.source === "cli"
+    && now() - Date.parse(cached.fetchedAt) < ttlMs;
   if (fresh) return Promise.resolve(mergeVerified(cached.models));
 
   return (async () => {

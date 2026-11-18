@@ -139,7 +139,7 @@ test("resolveModel/prepareCall 声明 reasoning 档位：过 DSH 0.2.1 运行时
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test("reasoningEffort -> opencode run --variant 透传；off/缺省不传（ISSUE-003 问题 2）", async () => {
+test("reasoningEffort -> opencode run --model provider/model#variant 透传；off/缺省不传（ISSUE-003 问题 2 / v2 语法）", async () => {
   const mk = (over) => makeAdapter({
     cli: {
       command: process.execPath,

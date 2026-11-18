@@ -164,10 +164,21 @@ switch (MODE) {
   }
 
   case "variant-echo": {
-    const i = args.indexOf("--variant");
-    const seen = i >= 0 ? args[i + 1] : null;
+    // OpenCode v2：variant 不再有独立参数，拼在 --model 的 `#` 后缀上。
+    const i = args.indexOf("--model");
+    const model = i >= 0 ? args[i + 1] : null;
+    const hash = typeof model === "string" ? model.indexOf("#") : -1;
+    const seen = hash >= 0 ? model.slice(hash + 1) : null;
     line(stepStart("msg_1"));
     line(text("msg_1", `VARIANT=${seen}`));
+    line(finish("msg_1", "stop", T1));
+    break;
+  }
+
+  case "cwd-echo": {
+    // 工作区经 spawn cwd 承载（v2 无 --dir）；回显进程实际 cwd 供断言。
+    line(stepStart("msg_1"));
+    line(text("msg_1", `CWD=${process.cwd()}`));
     line(finish("msg_1", "stop", T1));
     break;
   }

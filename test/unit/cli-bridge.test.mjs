@@ -59,6 +59,42 @@ test("run argv 携带 --auto：headless 放行 OC 自有工具权限（解禁批
   }
 });
 
+test("OpenCode v2 argv：不再传 --dir，工作区经 spawn cwd 承载", async () => {
+  const { dir, opts } = baseOpts("cwd-echo");
+  const argsFile = join(dir, "args.jsonl");
+  process.env.FAKE_LOG_ARGS = argsFile;
+  try {
+    const r = await runCliBridge(opts);
+    assert.equal(r.text, `CWD=${dir}`, "工作区必须由 spawn cwd 生效");
+    const args = JSON.parse(readFileSync(argsFile, "utf8").trim().split("\n")[0]);
+    assert.ok(!args.includes("--dir"), `v2 已移除 --dir，argv 不得携带：${JSON.stringify(args)}`);
+    assert.ok(args.includes("run"), `argv 应包含 run 子命令：${JSON.stringify(args)}`);
+    assert.ok(args.includes("--model") && args.includes("opencode/mimo-v2.6-flash-free"));
+  } finally {
+    delete process.env.FAKE_LOG_ARGS;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("OpenCode v2 argv：思考强度折进 --model provider/model#variant，无独立 --variant", async () => {
+  const { dir, opts } = baseOpts("variant-echo", { variant: "high" });
+  const argsFile = join(dir, "args.jsonl");
+  process.env.FAKE_LOG_ARGS = argsFile;
+  try {
+    const r = await runCliBridge(opts);
+    assert.equal(r.text, "VARIANT=high");
+    const args = JSON.parse(readFileSync(argsFile, "utf8").trim().split("\n")[0]);
+    assert.ok(!args.includes("--variant"), `v2 已移除 --variant，argv 不得携带：${JSON.stringify(args)}`);
+    assert.ok(
+      args.includes("opencode/mimo-v2.6-flash-free#high"),
+      `variant 必须拼进模型 id：${JSON.stringify(args)}`,
+    );
+  } finally {
+    delete process.env.FAKE_LOG_ARGS;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("prompt 经 stdin 送达：40K 超长 prompt 不触发 CLI_START_FAILED（Windows 32767 命令行上限回归）", async () => {
   const { dir, opts } = baseOpts("stdin-echo", { prompt: "x".repeat(40_000) });
   try {
